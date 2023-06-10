@@ -4,6 +4,17 @@
             "runtime": "vercel-php@0.6.0"
         }
     },
+    "routes": [
+        {
+            "src": "/(css|js)/(.*)",
+            "dest": "public/$1/$2"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
+    "outputDirectory": "public/build",
     "env": {
         "APP_NAME": "Vercel Laravel",
         "APP_ENV": "production",
