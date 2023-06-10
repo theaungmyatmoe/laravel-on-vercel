@@ -1,66 +1,98 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Serving Laravel App in Vercel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Add `api` folder under the root project after that we have to add `index.php` file under the `api/` folder.
 
-## About Laravel
+```php
+<?php
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+/**
+ * Here is the serverless function entry
+ * for deployment with Vercel.
+ */
+require __DIR__ . '/../public/index.php';
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+It will forward all of the request from vercel to the `index.php`.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+After that create `vercel.json` under the root directory.
 
-## Learning Laravel
+```json
+{
+    "version": 2,
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.6.0"
+        }
+    },
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
+    "outputDirectory": "public/build",
+    "env": {
+        "APP_NAME": "Vercel Laravel",
+        "APP_ENV": "production",
+        "APP_KEY": "base64:CmdwjUo++yDpyhSlx78ZXQi3wEzdYNC3R8jAV0sbNqk=",
+        "APP_DEBUG": "false",
+        "APP_URL": "https://laravel-vercel-sooty.vercel.app",
+        "VERCEL_DEMO_MODE": "true",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "CACHE_DRIVER": "array",
+        "LOG_CHANNEL": "stderr",
+        "SESSION_DRIVER": "cookie",
+        "VIEW_COMPILED_PATH": "/tmp/views",
+        "SSR_TEMP_PATH": "/tmp/ssr",
+        "NODE_PATH": "node"
+    }
+}
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## version
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Version what the verson of schema version of vercel json file.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## functions
 
-## Laravel Sponsors
+Functions are where lambda funciton executed in vercel platform. In our app `vercel-php` function will run on the server.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## routes
 
-### Premium Partners
+Route is where vercel forward the request to the specific destination that we defined in the route object `dest`. Vercel will forward every request which is matched `(.*)` to the `/api/index.php` file.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## outputDirectory
 
-## Contributing
+Output directory is where nodejs dist file with custom name. In **Laravel** dist files are under `public/build` so we defined like so.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## env
 
-## Code of Conduct
+Env is where our environment variables from the `.env` file.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Note**: Don't forgot to add `APP_KEY` in the `env` and `APP_DEBUG` need to be `false` in production.
 
-## Security Vulnerabilities
+# Changing RouteServiceProvider.php
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+To serve api in laravel, we always request to the `/api` endpoint. However, in vercel the `api` is the folder name of **vercel api/** directory. So, we have to remove that `api` prefix from our route service provider. If dont' so, we have to request like that.
 
-## License
+```
+www.example.com/api -> www.example.com/api/api
+                                        ^
+                                        |
+                                        |_ api folder of our app
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+So, change to the following style. We **have to** omit `api` prefix to avoid the above problem.
+```php
+ Route::middleware('api')
+                ->prefix('v1')
+                ->group(base_path('routes/api.php'));
+```
+
+## Endpoints of this app
+
+[Larvel in Vercel](https://laravel-in-vercel.vercel.app/v1/ping)
