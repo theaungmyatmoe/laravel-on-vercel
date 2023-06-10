@@ -17,7 +17,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-Route::get('/ping', fn () => response()->json([
-    'msg' => 'pong'
-]));
+Route::redirect('/api');
