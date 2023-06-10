@@ -8,6 +8,13 @@
         {
             "src": "/(.*)",
             "dest": "/api/index.php"
+        },
+        {
+            "src": "/redirect",
+            "status": 308,
+            "headers": {
+                "Location": "https://example.com/"
+            }
         }
     ],
     "outputDirectory": "public/build",
